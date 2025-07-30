@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mente do Gestor - Dashboard de Tráfego</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <title>Previsão de Faturamento</title>
     <style>
         * {
             margin: 0;
@@ -13,1059 +12,1444 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            line-height: 1.6;
         }
 
         .header {
+            background: #111;
+            padding: 20px;
+            border-bottom: 1px solid #333;
             text-align: center;
-            margin-bottom: 30px;
-            color: white;
         }
 
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .header p {
-            font-size: 1.2em;
-            opacity: 0.9;
-        }
-
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-        }
-
-        .card h3 {
-            color: #4a5568;
-            margin-bottom: 20px;
-            font-size: 1.4em;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 10px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #2d3748;
-        }
-
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
-            background: white;
-        }
-
-        .form-group input:focus, .form-group select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .metric-item {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);
-        }
-
-        .metric-item h4 {
-            font-size: 0.9em;
-            margin-bottom: 8px;
-            opacity: 0.9;
-        }
-
-        .metric-item .value {
-            font-size: 1.8em;
-            font-weight: bold;
-        }
-
-        .strategy-item {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            box-shadow: 0 3px 10px rgba(250, 112, 154, 0.3);
-        }
-
-        .strategy-item h4 {
-            margin-bottom: 8px;
-            font-size: 1.1em;
-        }
-
-        .strategy-item p {
-            font-size: 0.95em;
-            opacity: 0.95;
-        }
-
-        .performance-log {
-            max-height: 400px;
-            overflow-y: auto;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 15px;
-            background: #f7fafc;
-        }
-
-        .log-entry {
-            background: white;
-            border-left: 4px solid #667eea;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .log-entry h5 {
-            color: #4a5568;
-            margin-bottom: 8px;
-        }
-
-        .log-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 10px;
-            font-size: 0.9em;
-        }
-
-        .tab-container {
-            margin-bottom: 20px;
+            font-size: 28px;
+            font-weight: 600;
+            color: #00d4ff;
         }
 
         .tabs {
             display: flex;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            padding: 5px;
-            margin-bottom: 20px;
+            background: #111;
+            border-bottom: 1px solid #333;
         }
 
         .tab {
             flex: 1;
-            padding: 12px;
-            text-align: center;
-            border-radius: 8px;
+            padding: 15px 20px;
+            background: transparent;
+            border: none;
+            color: #888;
             cursor: pointer;
-            color: white;
-            font-weight: bold;
+            font-size: 14px;
+            font-weight: 500;
             transition: all 0.3s ease;
         }
 
+        .tab:hover {
+            color: #fff;
+            background: #1a1a1a;
+        }
+
         .tab.active {
-            background: rgba(255,255,255,0.2);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            color: #00d4ff;
+            background: #0a0a0a;
+            border-bottom: 2px solid #00d4ff;
         }
 
         .tab-content {
             display: none;
+            padding: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
         .tab-content.active {
             display: block;
         }
 
-        .chart-container {
-            position: relative;
-            height: 300px;
-            margin-top: 20px;
-            background: white;
-            border-radius: 10px;
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #ccc;
+            font-size: 14px;
+        }
+
+        .form-group input, .form-group select {
+            padding: 12px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: #00d4ff;
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn:hover {
+            background: #00b8e6;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #333;
+            color: #fff;
+        }
+
+        .btn-secondary:hover {
+            background: #444;
+        }
+
+        .btn-danger {
+            background: #ff4444;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #e63939;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: #1a1a1a;
             padding: 20px;
-        }
-
-        .alert {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
-            color: white;
-            padding: 15px;
             border-radius: 8px;
+            border: 1px solid #333;
+        }
+
+        .metric-card h3 {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .metric-card .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #00d4ff;
+        }
+
+        .suggestions {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            margin-top: 20px;
+        }
+
+        .suggestions h3 {
+            color: #00d4ff;
             margin-bottom: 15px;
-            text-align: center;
-            font-weight: bold;
         }
 
-        .success {
-            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+        .suggestion-item {
+            padding: 10px;
+            background: #111;
+            margin: 8px 0;
+            border-radius: 4px;
+            border-left: 3px solid #00d4ff;
         }
 
-        @media (max-width: 768px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-            }
-            
-            .header h1 {
-                font-size: 2em;
-            }
-            
-            .tabs {
-                flex-direction: column;
-            }
+        .performance-form {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            margin-bottom: 30px;
         }
 
-        .export-btn {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            margin-top: 10px;
+        .performance-form h3 {
+            color: #00d4ff;
+            margin-bottom: 20px;
+        }
+
+        .records-table {
+            background: #1a1a1a;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+
+        .records-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .records-table th,
+        .records-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+
+        .records-table th {
+            background: #111;
+            color: #00d4ff;
+            font-weight: 600;
+        }
+
+        .records-table td {
+            color: #ccc;
         }
 
         .delete-btn {
-            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
-            margin-top: 5px;
-            padding: 8px 15px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .report-section {
+            margin-top: 30px;
+        }
+
+        .chart-container {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            margin: 20px 0;
+            height: 400px;
+            position: relative;
+        }
+
+        .platform-analysis {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .platform-card {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+
+        .platform-card h4 {
+            color: #00d4ff;
+            margin-bottom: 15px;
+        }
+
+        .insight-box {
+            background: #0a2a1a;
+            border: 1px solid #00ff44;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .insight-box h4 {
+            color: #00ff44;
+            margin-bottom: 10px;
+        }
+
+        /* Estilo para o relatório de foto */
+        .photo-report {
+            background: #fff;
+            color: #000;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 20px 0;
+            display: none;
+            max-width: 800px;
+            margin: 20px auto;
+        }
+
+        .photo-report h2 {
+            color: #0066cc;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .photo-report .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .photo-report .summary-card {
+            background: linear-gradient(135deg, #0066cc, #00d4ff);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .photo-report .summary-card h4 {
+            font-size: 12px;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+
+        .photo-report .summary-card .big-number {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .photo-report .tips-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .photo-report .tips-section h3 {
+            color: #0066cc;
+            margin-bottom: 15px;
+        }
+
+        .photo-report .tip-item {
+            background: white;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border-left: 4px solid #00d4ff;
             font-size: 14px;
+        }
+
+        /* Ícones de data customizados */
+        input[type="date"] {
+            position: relative;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2300d4ff'%3e%3cpath fill-rule='evenodd' d='M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z' clip-rule='evenodd'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 20px;
+            padding-right: 40px;
+        }
+
+        /* Melhorias no gráfico */
+        .daily-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .daily-card {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            text-align: center;
+        }
+
+        .daily-card.investment {
+            border-left: 4px solid #ff6b6b;
+        }
+
+        .daily-card.sales {
+            border-left: 4px solid #4ecdc4;
+        }
+
+        .daily-card.return {
+            border-left: 4px solid #45b7d1;
+        }
+
+        .daily-card h4 {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .daily-card .number {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .daily-card.investment .number {
+            color: #ff6b6b;
+        }
+
+        .daily-card.sales .number {
+            color: #4ecdc4;
+        }
+
+        .daily-card.return .number {
+            color: #45b7d1;
+        }
+
+        .product-selector {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            margin-bottom: 20px;
+        }
+
+        .saved-products {
+            margin-top: 20px;
+        }
+
+        .product-item {
+            background: #111;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .product-item.active {
+            border: 2px solid #00d4ff;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🧠 Mente do Gestor</h1>
-            <p>Dashboard Completa para Gestores de Tráfego</p>
+    <div class="header">
+        <h1>Dashboard - Previsão de Faturamento</h1>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" onclick="showTab('config')">Configurações</button>
+        <button class="tab" onclick="showTab('metrics')">Métricas</button>
+        <button class="tab" onclick="showTab('performance')">Performance</button>
+    </div>
+
+    <!-- Aba Configurações -->
+    <div id="config" class="tab-content active">
+        <div class="saved-products">
+            <h3 style="color: #00d4ff; margin-bottom: 15px;">Produtos Salvos</h3>
+            <div id="savedProductsList"></div>
         </div>
 
-        <div class="tab-container">
-            <div class="tabs">
-                <div class="tab active" onclick="switchTab('setup')">⚙️ Configuração</div>
-                <div class="tab" onclick="switchTab('metrics')">📊 Métricas</div>
-                <div class="tab" onclick="switchTab('strategy')">🎯 Estratégia</div>
-                <div class="tab" onclick="switchTab('performance')">📈 Performance</div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Nome do Produto</label>
+                <input type="text" id="productName" placeholder="Ex: Curso de Marketing Digital">
+            </div>
+            <div class="form-group">
+                <label>Nicho do Produto</label>
+                <input type="text" id="productNiche" placeholder="Ex: Marketing Digital">
+            </div>
+            <div class="form-group">
+                <label>Taxa da Plataforma (%)</label>
+                <input type="number" id="platformFee" placeholder="Ex: 5.5" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Valor do Produto (R$)</label>
+                <input type="number" id="productValue" placeholder="Ex: 497" step="0.01">
+            </div>
+            <div class="form-group">
+                <label>Investimento Total em Anúncios (R$)</label>
+                <input type="number" id="totalInvestment" placeholder="Ex: 5000" step="0.01">
+            </div>
+            <div class="form-group">
+                <label>Período de Investimento (dias)</label>
+                <input type="number" id="investmentPeriod" placeholder="Ex: 30">
+            </div>
+            <div class="form-group">
+                <label>Investimento Google (%) </label>
+                <input type="number" id="googlePercentage" placeholder="Ex: 60" min="0" max="100">
+            </div>
+            <div class="form-group">
+                <label>Investimento Facebook (%)</label>
+                <input type="number" id="facebookPercentage" placeholder="Ex: 40" min="0" max="100">
+            </div>
+            <div class="form-group">
+                <label>Meta de Vendas no Período</label>
+                <input type="number" id="salesGoal" placeholder="Ex: 50">
+            </div>
+        </div>
+        <button class="btn" onclick="calculateMetrics()">Calcular Métricas</button>
+        <button class="btn btn-secondary" onclick="saveProduct()" style="margin-left: 10px;">Salvar Produto</button>
+    </div>
+
+    <!-- Aba Métricas -->
+    <div id="metrics" class="tab-content">
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <h3>ROI (%)</h3>
+                <div class="value" id="roi">0%</div>
+            </div>
+            <div class="metric-card">
+                <h3>ROAS</h3>
+                <div class="value" id="roas">0x</div>
+            </div>
+            <div class="metric-card">
+                <h3>CPA (R$)</h3>
+                <div class="value" id="cpa">R$ 0</div>
+            </div>
+            <div class="metric-card">
+                <h3>CPC Estimado (R$)</h3>
+                <div class="value" id="cpc">R$ 0</div>
+            </div>
+            <div class="metric-card">
+                <h3>Taxa de Conversão (%)</h3>
+                <div class="value" id="conversionRate">0%</div>
+            </div>
+            <div class="metric-card">
+                <h3>Receita Diária ADS (R$)</h3>
+                <div class="value" id="dailyRevenue">R$ 0</div>
+            </div>
+            <div class="metric-card">
+                <h3>Vendas por Dia</h3>
+                <div class="value" id="dailySales">0</div>
+            </div>
+            <div class="metric-card">
+                <h3>CPA Desejado (R$)</h3>
+                <div class="value" id="desiredCPA">R$ 0</div>
+            </div>
+            <div class="metric-card">
+                <h3>CPA Ideal (R$)</h3>
+                <div class="value" id="idealCPA">R$ 0</div>
+            </div>
+            <div class="metric-card">
+                <h3>Valor Líquido do Produto (R$)</h3>
+                <div class="value" id="netValue">R$ 0</div>
+            </div>
+            <div class="metric-card">
+                <h3>Investimento por Dia (R$)</h3>
+                <div class="value" id="dailyInvestment">R$ 0</div>
+            </div>
+            <div class="metric-card">
+                <h3>Google por Dia (R$)</h3>
+                <div class="value" id="googleDaily">R$ 0</div>
+            </div>
+            <div class="metric-card">
+                <h3>Facebook por Dia (R$)</h3>
+                <div class="value" id="facebookDaily">R$ 0</div>
+            </div>
+            <div class="metric-card">
+                <h3>Faturamento Esperado (R$)</h3>
+                <div class="value" id="expectedRevenue">R$ 0</div>
             </div>
         </div>
 
-        <div id="setup" class="tab-content active">
-            <div class="dashboard">
-                <div class="card">
-                    <h3>🛍️ Configuração do Produto</h3>
-                    <div class="form-group">
-                        <label for="productName">Nome do Produto:</label>
-                        <input type="text" id="productName" placeholder="Ex: Curso de Marketing Digital">
-                    </div>
-                    <div class="form-group">
-                        <label for="productValue">Valor do Produto (R$):</label>
-                        <input type="number" id="productValue" placeholder="497.00" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label for="platformFee">Taxa da Plataforma (%):</label>
-                        <input type="number" id="platformFee" placeholder="6.4" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label for="incomeTax">Imposto de Renda (%):</label>
-                        <input type="number" id="incomeTax" placeholder="27.5" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label for="monthlyGoal">Meta Mensal de Vendas:</label>
-                        <input type="number" id="monthlyGoal" placeholder="100">
-                    </div>
-                    <button class="btn" onclick="calculateMetrics()">🚀 Calcular Métricas</button>
-                </div>
+        <div class="suggestions">
+            <h3>Sugestões de Order Bump</h3>
+            <div id="orderBumpSuggestions"></div>
+        </div>
 
-                <div class="card">
-                    <h3>🎯 Configurações de Campanha</h3>
-                    <div class="form-group">
-                        <label for="targetRoas">ROAS Alvo:</label>
-                        <input type="number" id="targetRoas" placeholder="3.0" step="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label for="conversionRate">Taxa de Conversão (%):</label>
-                        <input type="number" id="conversionRate" placeholder="2.5" step="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label for="avgCpc">CPC Médio (R$):</label>
-                        <input type="number" id="avgCpc" placeholder="1.50" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label for="budgetSplit">Divisão de Orçamento:</label>
-                        <select id="budgetSplit">
-                            <option value="60-40">60% Facebook / 40% Google</option>
-                            <option value="70-30">70% Facebook / 30% Google</option>
-                            <option value="50-50">50% Facebook / 50% Google</option>
-                            <option value="80-20">80% Facebook / 20% Google</option>
-                        </select>
-                    </div>
+        <div class="suggestions">
+            <h3>Sugestões de Upsell</h3>
+            <div id="upsellSuggestions"></div>
+        </div>
+    </div>
+
+    <!-- Aba Performance -->
+    <div id="performance" class="tab-content">
+        <div class="product-selector">
+            <h3 style="color: #00d4ff; margin-bottom: 10px;">Selecionar Produto para Análise</h3>
+            <select id="productSelect" onchange="filterRecordsByProduct()">
+                <option value="">Todos os produtos</option>
+            </select>
+        </div>
+
+        <div class="performance-form">
+            <h3>Registro Diário de Performance</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>📅 Data</label>
+                    <input type="date" id="recordDate">
                 </div>
+                <div class="form-group">
+                    <label>Produto</label>
+                    <select id="recordProduct">
+                        <option value="">Selecionar produto</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>💰 Valor Investido (R$)</label>
+                    <input type="number" id="dailySpent" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>👆 Cliques</label>
+                    <input type="number" id="dailyClicks">
+                </div>
+                <div class="form-group">
+                    <label>🛒 Vendas</label>
+                    <input type="number" id="dailySalesRecord">
+                </div>
+                <div class="form-group">
+                    <label>💵 Retorno (R$)</label>
+                    <input type="number" id="dailyReturn" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>📱 Plataforma</label>
+                    <select id="platform">
+                        <option value="Google">Google</option>
+                        <option value="Facebook">Facebook</option>
+                        <option value="Ambas">Ambas</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn" onclick="addPerformanceRecord()">Adicionar Registro</button>
+        </div>
+
+        <div class="daily-summary">
+            <div class="daily-card investment">
+                <h4>💰 INVESTIDO HOJE</h4>
+                <div class="number" id="todayInvestment">R$ 0</div>
+            </div>
+            <div class="daily-card sales">
+                <h4>🛒 VENDAS HOJE</h4>
+                <div class="number" id="todaySales">0</div>
+            </div>
+            <div class="daily-card return">
+                <h4>💵 RETORNO HOJE</h4>
+                <div class="number" id="todayReturn">R$ 0</div>
             </div>
         </div>
 
-        <div id="metrics" class="tab-content">
-            <div class="card">
-                <h3>📊 Métricas Calculadas</h3>
-                <div id="metricsResults"></div>
-            </div>
+        <div class="records-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Produto</th>
+                        <th>Investido</th>
+                        <th>Cliques</th>
+                        <th>Vendas</th>
+                        <th>Retorno</th>
+                        <th>Plataforma</th>
+                        <th>CPA</th>
+                        <th>ROI</th>
+                        <th>ROAS</th>
+                        <th>Conv. %</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="recordsTableBody">
+                </tbody>
+            </table>
         </div>
 
-        <div id="strategy" class="tab-content">
-            <div class="card">
-                <h3>🎯 Estratégia Completa de Vendas</h3>
-                <div id="strategyResults"></div>
+        <div class="report-section">
+            <h3 style="color: #00d4ff; margin-bottom: 20px;">Relatório de Performance</h3>
+            <div class="form-grid" style="max-width: 600px;">
+                <div class="form-group">
+                    <label>📅 Data Início</label>
+                    <input type="date" id="reportStartDate">
+                </div>
+                <div class="form-group">
+                    <label>📅 Data Fim</label>
+                    <input type="date" id="reportEndDate">
+                </div>
             </div>
-        </div>
+            <button class="btn" onclick="generateReport()">Gerar Relatório</button>
+            <button class="btn btn-secondary" onclick="generatePhotoReport()" style="margin-left: 10px;">📸 Relatório para Foto</button>
 
-        <div id="performance" class="tab-content">
-            <div class="dashboard">
-                <div class="card">
-                    <h3>📈 Registro de Performance Diária</h3>
-                    <div class="form-group">
-                        <label for="dailySpent">Investimento Diário (R$):</label>
-                        <input type="number" id="dailySpent" placeholder="150.00" step="0.01">
+            <div id="reportResults" style="display: none;">
+                <!-- Relatório para foto -->
+                <div id="photoReport" class="photo-report">
+                    <h2>📊 RELATÓRIO DE PERFORMANCE</h2>
+                    <div style="text-align: center; margin-bottom: 20px; color: #666;">
+                        <span id="reportPeriodText"></span>
                     </div>
-                    <div class="form-group">
-                        <label for="dailyClicks">Cliques:</label>
-                        <input type="number" id="dailyClicks" placeholder="100">
+                    
+                    <div class="summary-cards">
+                        <div class="summary-card">
+                            <h4>TOTAL INVESTIDO</h4>
+                            <div class="big-number" id="photoTotalSpent">R$ 0</div>
+                        </div>
+                        <div class="summary-card">
+                            <h4>TOTAL FATURADO</h4>
+                            <div class="big-number" id="photoTotalRevenue">R$ 0</div>
+                        </div>
+                        <div class="summary-card">
+                            <h4>ROAS MÉDIO</h4>
+                            <div class="big-number" id="photoAvgRoas">0x</div>
+                        </div>
+                        <div class="summary-card">
+                            <h4>ROI MÉDIO</h4>
+                            <div class="big-number" id="photoAvgRoi">0%</div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="dailyConversions">Conversões:</label>
-                        <input type="number" id="dailyConversions" placeholder="3">
+
+                    <div class="tips-section">
+                        <h3>🚀 DICAS PARA MELHORAR O TRÁFEGO PAGO</h3>
+                        <div id="photoTips"></div>
                     </div>
-                    <div class="form-group">
-                        <label for="dailyRevenue">Receita (R$):</label>
-                        <input type="number" id="dailyRevenue" placeholder="1491.00" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label for="platform">Plataforma:</label>
-                        <select id="platform">
-                            <option value="Facebook">Facebook Ads</option>
-                            <option value="Google">Google Ads</option>
-                            <option value="Ambos">Ambos</option>
-                        </select>
-                    </div>
-                    <button class="btn" onclick="addPerformanceLog()">➕ Adicionar Registro</button>
-                    <button class="btn export-btn" onclick="exportData()">📤 Exportar Dados</button>
                 </div>
 
-                <div class="card">
-                    <h3>📊 Histórico de Performance</h3>
-                    <div class="performance-log" id="performanceLog"></div>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <h3>Total Investido</h3>
+                        <div class="value" id="reportTotalSpent">R$ 0</div>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Total Faturado</h3>
+                        <div class="value" id="reportTotalRevenue">R$ 0</div>
+                    </div>
+                    <div class="metric-card">
+                        <h3>ROAS Médio</h3>
+                        <div class="value" id="reportAvgRoas">0x</div>
+                    </div>
+                    <div class="metric-card">
+                        <h3>ROI Médio</h3>
+                        <div class="value" id="reportAvgRoi">0%</div>
+                    </div>
                 </div>
 
-                <div class="card">
-                    <h3>📈 Gráfico de Performance</h3>
-                    <div class="chart-container">
-                        <canvas id="performanceChart"></canvas>
+                <div class="chart-container">
+                    <h4 style="color: #00d4ff; margin-bottom: 20px;">Performance Diária</h4>
+                    <canvas id="performanceChart" width="1000" height="300"></canvas>
+                </div>
+
+                <div class="platform-analysis">
+                    <div class="platform-card" id="googleAnalysis">
+                        <h4>Google Ads</h4>
+                        <p>Investimento: <span id="googleTotalSpent">R$ 0</span></p>
+                        <p>Retorno: <span id="googleTotalReturn">R$ 0</span></p>
+                        <p>ROAS: <span id="googleRoas">0x</span></p>
                     </div>
+                    <div class="platform-card" id="facebookAnalysis">
+                        <h4>Facebook Ads</h4>
+                        <p>Investimento: <span id="facebookTotalSpent">R$ 0</span></p>
+                        <p>Retorno: <span id="facebookTotalReturn">R$ 0</span></p>
+                        <p>ROAS: <span id="facebookRoas">0x</span></p>
+                    </div>
+                </div>
+
+                <div class="insight-box">
+                    <h4>Insights para Melhorar as Campanhas</h4>
+                    <div id="campaignInsights"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        let productData = {};
-        let performanceData = [];
-        let chart = null;
+        let performanceRecords = [];
+        let savedProducts = [];
+        let currentProductId = null;
 
-        // Carregar dados salvos
-        function loadSavedData() {
-            const savedProduct = JSON.parse(localStorage.getItem('menteGestorProduct') || '{}');
-            const savedPerformance = JSON.parse(localStorage.getItem('menteGestorPerformance') || '[]');
+        // Carregar dados salvos ao iniciar
+        window.onload = function() {
+            loadSavedData();
+            updateProductSelectors();
+            updateDailySummary();
+        };
+
+        // Definir data atual
+        document.getElementById('recordDate').valueAsDate = new Date();
+
+        function showTab(tabName) {
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
             
-            if (Object.keys(savedProduct).length > 0) {
-                document.getElementById('productName').value = savedProduct.name || '';
-                document.getElementById('productValue').value = savedProduct.value || '';
-                document.getElementById('platformFee').value = savedProduct.platformFee || '';
-                document.getElementById('incomeTax').value = savedProduct.incomeTax || '';
-                document.getElementById('monthlyGoal').value = savedProduct.monthlyGoal || '';
-                document.getElementById('targetRoas').value = savedProduct.targetRoas || '';
-                document.getElementById('conversionRate').value = savedProduct.conversionRate || '';
-                document.getElementById('avgCpc').value = savedProduct.avgCpc || '';
-                document.getElementById('budgetSplit').value = savedProduct.budgetSplit || '';
-                productData = savedProduct;
-                calculateMetrics();
-            }
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
             
-            performanceData = savedPerformance;
-            updatePerformanceLog();
-            updateChart();
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
         }
 
-        function switchTab(tabName) {
-            // Remover active de todas as tabs
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        function saveProduct() {
+            const productName = document.getElementById('productName').value;
+            const productNiche = document.getElementById('productNiche').value;
+            const platformFee = parseFloat(document.getElementById('platformFee').value) || 0;
+            const productValue = parseFloat(document.getElementById('productValue').value) || 0;
+            const totalInvestment = parseFloat(document.getElementById('totalInvestment').value) || 0;
+            const investmentPeriod = parseInt(document.getElementById('investmentPeriod').value) || 30;
+            const googlePercentage = parseFloat(document.getElementById('googlePercentage').value) || 50;
+            const facebookPercentage = parseFloat(document.getElementById('facebookPercentage').value) || 50;
+            const salesGoal = parseInt(document.getElementById('salesGoal').value) || 0;
+
+            if (!productName || productValue === 0) {
+                alert('Por favor, preencha pelo menos o nome e valor do produto.');
+                return;
+            }
+
+            const product = {
+                id: Date.now(),
+                name: productName,
+                niche: productNiche,
+                platformFee,
+                value: productValue,
+                totalInvestment,
+                investmentPeriod,
+                googlePercentage,
+                facebookPercentage,
+                salesGoal,
+                createdAt: new Date().toISOString()
+            };
+
+            savedProducts.push(product);
+            currentProductId = product.id;
+            saveDataToStorage();
+            updateSavedProductsList();
+            updateProductSelectors();
+            alert('Produto salvo com sucesso!');
+        }
+
+        function loadProduct(productId) {
+            const product = savedProducts.find(p => p.id === productId);
+            if (!product) return;
+
+            document.getElementById('productName').value = product.name;
+            document.getElementById('productNiche').value = product.niche;
+            document.getElementById('platformFee').value = product.platformFee;
+            document.getElementById('productValue').value = product.value;
+            document.getElementById('totalInvestment').value = product.totalInvestment;
+            document.getElementById('investmentPeriod').value = product.investmentPeriod;
+            document.getElementById('googlePercentage').value = product.googlePercentage;
+            document.getElementById('facebookPercentage').value = product.facebookPercentage;
+            document.getElementById('salesGoal').value = product.salesGoal;
             
-            // Ativar tab selecionada
-            event.target.classList.add('active');
-            document.getElementById(tabName).classList.add('active');
+            currentProductId = productId;
+            updateSavedProductsList();
+            calculateMetrics();
+        }
+
+        function deleteProduct(productId) {
+            if (confirm('Tem certeza que deseja excluir este produto?')) {
+                savedProducts = savedProducts.filter(p => p.id !== productId);
+                performanceRecords = performanceRecords.filter(r => r.productId !== productId);
+                saveDataToStorage();
+                updateSavedProductsList();
+                updateProductSelectors();
+                updateRecordsTable();
+            }
+        }
+
+        function updateSavedProductsList() {
+            const container = document.getElementById('savedProductsList');
+            container.innerHTML = '';
+
+            savedProducts.forEach(product => {
+                const div = document.createElement('div');
+                div.className = `product-item ${product.id === currentProductId ? 'active' : ''}`;
+                div.innerHTML = `
+                    <div>
+                        <strong>${product.name}</strong> - ${product.niche} - R$ ${product.value.toFixed(2)}
+                    </div>
+                    <div>
+                        <button class="btn btn-secondary" onclick="loadProduct(${product.id})" style="margin-right: 5px; padding: 5px 10px;">Carregar</button>
+                        <button class="btn btn-danger" onclick="deleteProduct(${product.id})" style="padding: 5px 10px;">Excluir</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateProductSelectors() {
+            const selectors = ['productSelect', 'recordProduct'];
+            
+            selectors.forEach(selectorId => {
+                const select = document.getElementById(selectorId);
+                const currentValue = select.value;
+                select.innerHTML = selectorId === 'productSelect' ? '<option value="">Todos os produtos</option>' : '<option value="">Selecionar produto</option>';
+                
+                savedProducts.forEach(product => {
+                    const option = document.createElement('option');
+                    option.value = product.id;
+                    option.textContent = product.name;
+                    select.appendChild(option);
+                });
+                
+                select.value = currentValue;
+            });
         }
 
         function calculateMetrics() {
-            const name = document.getElementById('productName').value;
-            const value = parseFloat(document.getElementById('productValue').value) || 0;
+            const productValue = parseFloat(document.getElementById('productValue').value) || 0;
+            const totalInvestment = parseFloat(document.getElementById('totalInvestment').value) || 0;
+            const investmentPeriod = parseInt(document.getElementById('investmentPeriod').value) || 30;
+            const salesGoal = parseInt(document.getElementById('salesGoal').value) || 0;
             const platformFee = parseFloat(document.getElementById('platformFee').value) || 0;
-            const incomeTax = parseFloat(document.getElementById('incomeTax').value) || 0;
-            const monthlyGoal = parseInt(document.getElementById('monthlyGoal').value) || 0;
-            const targetRoas = parseFloat(document.getElementById('targetRoas').value) || 3.0;
-            const conversionRate = parseFloat(document.getElementById('conversionRate').value) || 2.5;
-            const avgCpc = parseFloat(document.getElementById('avgCpc').value) || 1.50;
-            const budgetSplit = document.getElementById('budgetSplit').value;
+            const googlePercentage = parseFloat(document.getElementById('googlePercentage').value) || 50;
+            const facebookPercentage = parseFloat(document.getElementById('facebookPercentage').value) || 50;
 
-            if (!name || !value) {
-                alert('Por favor, preencha pelo menos o nome e valor do produto!');
+            if (productValue === 0 || totalInvestment === 0 || salesGoal === 0) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
                 return;
             }
 
-            // Cálculos
-            const platformCost = value * (platformFee / 100);
-            const taxCost = value * (incomeTax / 100);
-            const netValue = value - platformCost - taxCost;
+            // Cálculos básicos
+            const totalRevenue = productValue * salesGoal;
+            const netValue = productValue * (1 - platformFee / 100);
+            const netRevenue = netValue * salesGoal;
+            const profit = netRevenue - totalInvestment;
             
-            const monthlyRevenue = monthlyGoal * value;
-            const maxInvestment = monthlyRevenue / targetRoas;
-            const dailyBudget = maxInvestment / 30;
+            const roi = ((profit / totalInvestment) * 100);
+            const roas = totalRevenue / totalInvestment;
+            const cpa = totalInvestment / salesGoal;
+            const dailyInvestment = totalInvestment / investmentPeriod;
+            const dailySales = salesGoal / investmentPeriod;
+            const dailyRevenue = dailySales * productValue;
             
-            const cpa = netValue / (targetRoas - 1);
-            const requiredClicks = (monthlyGoal / (conversionRate / 100));
-            const monthlyCpc = (maxInvestment / requiredClicks);
+            // CPC estimado (assumindo taxa de conversão de 2%)
+            const estimatedConversionRate = 2;
+            const totalClicks = salesGoal / (estimatedConversionRate / 100);
+            const cpc = totalInvestment / totalClicks;
             
-            const roi = ((netValue - (maxInvestment / monthlyGoal)) / (maxInvestment / monthlyGoal)) * 100;
+            const desiredCPA = netValue * 0.3; // 30% do valor líquido
+            const idealCPA = netValue * 0.2; // 20% do valor líquido
+            
+            const googleDaily = (dailyInvestment * googlePercentage) / 100;
+            const facebookDaily = (dailyInvestment * facebookPercentage) / 100;
+            
+            const expectedRevenue = totalRevenue;
 
-            // Divisão de orçamento
-            const [fbPercent, googlePercent] = budgetSplit.split('-').map(p => parseInt(p));
-            const fbBudget = (dailyBudget * fbPercent) / 100;
-            const googleBudget = (dailyBudget * googlePercent) / 100;
+            // Atualizar métricas na tela
+            document.getElementById('roi').textContent = roi.toFixed(1) + '%';
+            document.getElementById('roas').textContent = roas.toFixed(2) + 'x';
+            document.getElementById('cpa').textContent = 'R$ ' + cpa.toFixed(2);
+            document.getElementById('cpc').textContent = 'R$ ' + cpc.toFixed(2);
+            document.getElementById('conversionRate').textContent = estimatedConversionRate + '%';
+            document.getElementById('dailyRevenue').textContent = 'R$ ' + dailyRevenue.toFixed(2);
+            document.getElementById('dailySales').textContent = dailySales.toFixed(1);
+            document.getElementById('desiredCPA').textContent = 'R$ ' + desiredCPA.toFixed(2);
+            document.getElementById('idealCPA').textContent = 'R$ ' + idealCPA.toFixed(2);
+            document.getElementById('netValue').textContent = 'R$ ' + netValue.toFixed(2);
+            document.getElementById('dailyInvestment').textContent = 'R$ ' + dailyInvestment.toFixed(2);
+            document.getElementById('googleDaily').textContent = 'R$ ' + googleDaily.toFixed(2);
+            document.getElementById('facebookDaily').textContent = 'R$ ' + facebookDaily.toFixed(2);
+            document.getElementById('expectedRevenue').textContent = 'R$ ' + expectedRevenue.toFixed(2);
 
-            productData = {
-                name, value, platformFee, incomeTax, monthlyGoal, targetRoas,
-                conversionRate, avgCpc, budgetSplit, netValue, monthlyRevenue,
-                maxInvestment, dailyBudget, cpa, roi, fbBudget, googleBudget,
-                requiredClicks, monthlyCpc
-            };
-
-            // Salvar dados
-            localStorage.setItem('menteGestorProduct', JSON.stringify(productData));
-
-            displayMetrics();
-            generateStrategy();
+            // Gerar sugestões de Order Bump
+            generateOrderBumpSuggestions(productValue);
+            generateUpsellSuggestions(productValue);
         }
 
-        function displayMetrics() {
-            const metrics = `
-                <div class="metrics-grid">
-                    <div class="metric-item">
-                        <h4>Valor Líquido</h4>
-                        <div class="value">R$ ${productData.netValue.toFixed(2)}</div>
-                    </div>
-                    <div class="metric-item">
-                        <h4>CPA Ideal</h4>
-                        <div class="value">R$ ${productData.cpa.toFixed(2)}</div>
-                    </div>
-                    <div class="metric-item">
-                        <h4>ROI</h4>
-                        <div class="value">${productData.roi.toFixed(1)}%</div>
-                    </div>
-                    <div class="metric-item">
-                        <h4>ROAS Alvo</h4>
-                        <div class="value">${productData.targetRoas}x</div>
-                    </div>
-                    <div class="metric-item">
-                        <h4>Orçamento Diário</h4>
-                        <div class="value">R$ ${productData.dailyBudget.toFixed(2)}</div>
-                    </div>
-                    <div class="metric-item">
-                        <h4>Meta Mensal</h4>
-                        <div class="value">R$ ${productData.monthlyRevenue.toFixed(2)}</div>
-                    </div>
-                    <div class="metric-item">
-                        <h4>Facebook Ads</h4>
-                        <div class="value">R$ ${productData.fbBudget.toFixed(2)}/dia</div>
-                    </div>
-                    <div class="metric-item">
-                        <h4>Google Ads</h4>
-                        <div class="value">R$ ${productData.googleBudget.toFixed(2)}/dia</div>
-                    </div>
-                </div>
-            `;
-            document.getElementById('metricsResults').innerHTML = metrics;
-        }
-
-        function generateStrategy() {
-            const strategies = [
-                {
-                    title: "🎯 Segmentação e Público",
-                    content: `Foque em públicos lookalike baseados em compradores e engajamento. Para ${productData.name}, teste idades 25-45 anos com interesses em educação e desenvolvimento profissional.`
-                },
-                {
-                    title: "💰 Estratégia de Lances",
-                    content: `Mantenha CPA abaixo de R$ ${productData.cpa.toFixed(2)}. Inicie com lances automáticos e otimize para conversões após 50 conversões.`
-                },
-                {
-                    title: "📱 Criativos e Formatos",
-                    content: `Use vídeos de 15-30s mostrando resultados reais, carrosséis com depoimentos e imagens estáticas com copy persuasivo. Teste pelo menos 3 formatos diferentes.`
-                },
-                {
-                    title: "⏰ Cronograma de Testes",
-                    content: `Invista R$ ${productData.fbBudget.toFixed(2)} no Facebook e R$ ${productData.googleBudget.toFixed(2)} no Google diariamente. Pause anúncios com CPA acima de R$ ${(productData.cpa * 1.5).toFixed(2)}.`
-                },
-                {
-                    title: "📊 KPIs Principais",
-                    content: `CTR > 2%, CPC < R$ ${productData.monthlyCpc.toFixed(2)}, Taxa de Conversão > ${productData.conversionRate}%, ROAS > ${productData.targetRoas}x`
-                },
-                {
-                    title: "🔄 Otimizações Diárias",
-                    content: `Analise performance às 10h e 18h. Aumente orçamento em 20% em campanhas com ROAS > ${productData.targetRoas + 1}x. Pause audiences com 0 conversões após R$ ${(productData.cpa * 2).toFixed(2)} gastos.`
-                }
+        function generateOrderBumpSuggestions(productValue) {
+            const suggestions = [
+                { name: 'E-book Complementar', price: productValue * 0.15 },
+                { name: 'Checklist Premium', price: productValue * 0.1 },
+                { name: 'Templates Exclusivos', price: productValue * 0.2 },
+                { name: 'Bônus de Implementação', price: productValue * 0.25 },
+                { name: 'Acesso VIP Comunidade', price: productValue * 0.3 }
             ];
 
-            const strategyHtml = strategies.map(strategy => `
-                <div class="strategy-item">
-                    <h4>${strategy.title}</h4>
-                    <p>${strategy.content}</p>
-                </div>
-            `).join('');
-
-            document.getElementById('strategyResults').innerHTML = strategyHtml;
+            const container = document.getElementById('orderBumpSuggestions');
+            container.innerHTML = '';
+            
+            suggestions.forEach(suggestion => {
+                const div = document.createElement('div');
+                div.className = 'suggestion-item';
+                div.innerHTML = `<strong>${suggestion.name}</strong> - R$ ${suggestion.price.toFixed(2)}`;
+                container.appendChild(div);
+            });
         }
 
-        function addPerformanceLog() {
+        function generateUpsellSuggestions(productValue) {
+            const suggestions = [
+                { name: 'Consultoria 1:1 (1h)', price: productValue * 0.8 },
+                { name: 'Curso Avançado', price: productValue * 1.5 },
+                { name: 'Mentoria de Grupo (3 meses)', price: productValue * 2.0 },
+                { name: 'Implementação Feita para Você', price: productValue * 3.0 },
+                { name: 'Certificação Profissional', price: productValue * 1.2 }
+            ];
+
+            const container = document.getElementById('upsellSuggestions');
+            container.innerHTML = '';
+            
+            suggestions.forEach(suggestion => {
+                const div = document.createElement('div');
+                div.className = 'suggestion-item';
+                div.innerHTML = `<strong>${suggestion.name}</strong> - R$ ${suggestion.price.toFixed(2)}`;
+                container.appendChild(div);
+            });
+        }
+
+        function addPerformanceRecord() {
+            const date = document.getElementById('recordDate').value;
+            const productId = document.getElementById('recordProduct').value;
             const spent = parseFloat(document.getElementById('dailySpent').value) || 0;
             const clicks = parseInt(document.getElementById('dailyClicks').value) || 0;
-            const conversions = parseInt(document.getElementById('dailyConversions').value) || 0;
-            const revenue = parseFloat(document.getElementById('dailyRevenue').value) || 0;
+            const sales = parseInt(document.getElementById('dailySalesRecord').value) || 0;
+            const returnValue = parseFloat(document.getElementById('dailyReturn').value) || 0;
             const platform = document.getElementById('platform').value;
 
-            if (!spent || !clicks) {
-                alert('Preencha pelo menos o investimento e cliques!');
+            if (!date || spent === 0 || !productId) {
+                alert('Por favor, preencha pelo menos a data, produto e o valor investido.');
                 return;
             }
 
-            const cpc = clicks > 0 ? spent / clicks : 0;
-            const conversionRate = clicks > 0 ? (conversions / clicks) * 100 : 0;
-            const cpa = conversions > 0 ? spent / conversions : 0;
-            const roas = spent > 0 ? revenue / spent : 0;
-            const roi = spent > 0 ? ((revenue - spent) / spent) * 100 : 0;
+            const cpa = sales > 0 ? spent / sales : 0;
+            const roi = spent > 0 ? ((returnValue - spent) / spent) * 100 : 0;
+            const roas = spent > 0 ? returnValue / spent : 0;
+            const conversionRate = clicks > 0 ? (sales / clicks) * 100 : 0;
 
-            const logEntry = {
-                date: new Date().toLocaleDateString('pt-BR'),
-                platform,
+            const record = {
+                id: Date.now(),
+                date,
+                productId,
                 spent,
                 clicks,
-                conversions,
-                revenue,
-                cpc,
-                conversionRate,
+                sales,
+                returnValue,
+                platform,
                 cpa,
+                roi,
                 roas,
-                roi
+                conversionRate
             };
 
-            performanceData.unshift(logEntry);
-            
-            // Manter apenas últimos 30 registros
-            if (performanceData.length > 30) {
-                performanceData = performanceData.slice(0, 30);
-            }
-
-            // Salvar dados
-            localStorage.setItem('menteGestorPerformance', JSON.stringify(performanceData));
-
-            // Limpar formulário
-            document.getElementById('dailySpent').value = '';
-            document.getElementById('dailyClicks').value = '';
-            document.getElementById('dailyConversions').value = '';
-            document.getElementById('dailyRevenue').value = '';
-
-            updatePerformanceLog();
-            updateChart();
-
-            // Mostrar alerta de sucesso
-            const alert = document.createElement('div');
-            alert.className = 'alert success';
-            alert.textContent = '✅ Registro adicionado com sucesso!';
-            document.querySelector('#performance .card').insertBefore(alert, document.querySelector('#performance .form-group'));
-            setTimeout(() => alert.remove(), 3000);
+            performanceRecords.push(record);
+            saveDataToStorage();
+            updateRecordsTable();
+            updateDailySummary();
+            clearPerformanceForm();
         }
 
-        function updatePerformanceLog() {
-            const logHtml = performanceData.map((entry, index) => `
-                <div class="log-entry">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <h5>📅 ${entry.date} - ${entry.platform}</h5>
-                        <button class="delete-btn" onclick="deleteLogEntry(${index})">🗑️</button>
-                    </div>
-                    <div class="log-stats">
-                        <div><strong>Gasto:</strong> R$ ${entry.spent.toFixed(2)}</div>
-                        <div><strong>Cliques:</strong> ${entry.clicks}</div>
-                        <div><strong>Conversões:</strong> ${entry.conversions}</div>
-                        <div><strong>Receita:</strong> R$ ${entry.revenue.toFixed(2)}</div>
-                        <div><strong>CPC:</strong> R$ ${entry.cpc.toFixed(2)}</div>
-                        <div><strong>Taxa Conv:</strong> ${entry.conversionRate.toFixed(1)}%</div>
-                        <div><strong>CPA:</strong> R$ ${entry.cpa.toFixed(2)}</div>
-                        <div><strong>ROAS:</strong> ${entry.roas.toFixed(2)}x</div>
-                        <div><strong>ROI:</strong> ${entry.roi.toFixed(1)}%</div>
-                    </div>
-                </div>
-            `).join('');
+        function updateRecordsTable() {
+            const tbody = document.getElementById('recordsTableBody');
+            tbody.innerHTML = '';
 
-            document.getElementById('performanceLog').innerHTML = logHtml || '<p>Nenhum registro encontrado. Adicione sua primeira performance!</p>';
-        }
+            const selectedProduct = document.getElementById('productSelect').value;
+            const filteredRecords = selectedProduct ? 
+                performanceRecords.filter(r => r.productId == selectedProduct) : 
+                performanceRecords;
 
-        function deleteLogEntry(index) {
-            if (confirm('Tem certeza que deseja excluir este registro?')) {
-                performanceData.splice(index, 1);
-                localStorage.setItem('menteGestorPerformance', JSON.stringify(performanceData));
-                updatePerformanceLog();
-                updateChart();
-            }
-        }
-
-        function updateChart() {
-            const ctx = document.getElementById('performanceChart').getContext('2d');
-            
-            if (chart) {
-                chart.destroy();
-            }
-
-            const labels = performanceData.slice().reverse().map(entry => entry.date);
-            const roasData = performanceData.slice().reverse().map(entry => entry.roas);
-            const cpaData = performanceData.slice().reverse().map(entry => entry.cpa);
-
-            chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'ROAS',
-                        data: roasData,
-                        borderColor: '#667eea',
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                        tension: 0.4,
-                        yAxisID: 'y'
-                    }, {
-                        label: 'CPA (R$)',
-                        data: cpaData,
-                        borderColor: '#fa709a',
-                        backgroundColor: 'rgba(250, 112, 154, 0.1)',
-                        tension: 0.4,
-                        yAxisID: 'y1'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            type: 'linear',
-                            display: true,
-                            position: 'left',
-                            title: {
-                                display: true,
-                                text: 'ROAS'
-                            }
-                        },
-                        y1: {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            title: {
-                                display: true,
-                                text: 'CPA (R$)'
-                            },
-                            grid: {
-                                drawOnChartArea: false,
-                            },
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top'
-                        }
-                    }
-                }
+            filteredRecords.forEach(record => {
+                const product = savedProducts.find(p => p.id == record.productId);
+                const productName = product ? product.name : 'Produto não encontrado';
+                
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${new Date(record.date).toLocaleDateString('pt-BR')}</td>
+                    <td>${productName}</td>
+                    <td>R$ ${record.spent.toFixed(2)}</td>
+                    <td>${record.clicks}</td>
+                    <td>${record.sales}</td>  
+                    <td>R$ ${record.returnValue.toFixed(2)}</td>
+                    <td>${record.platform}</td>
+                    <td>R$ ${record.cpa.toFixed(2)}</td>
+                    <td>${record.roi.toFixed(1)}%</td>
+                    <td>${record.roas.toFixed(2)}x</td>
+                    <td>${record.conversionRate.toFixed(1)}%</td>
+                    <td><button class="delete-btn" onclick="deleteRecord(${record.id})">Excluir</button></td>
+                `;
             });
         }
 
-        function exportData() {
-            const exportData = {
-                produto: productData,
-                performance: performanceData,
-                resumo: {
-                    totalGasto: performanceData.reduce((sum, entry) => sum + entry.spent, 0),
-                    totalReceita: performanceData.reduce((sum, entry) => sum + entry.revenue, 0),
-                    totalConversoes: performanceData.reduce((sum, entry) => sum + entry.conversions, 0),
-                    roasMedio: performanceData.length > 0 ? 
-                        performanceData.reduce((sum, entry) => sum + entry.roas, 0) / performanceData.length : 0,
-                    cpaMedio: performanceData.length > 0 ? 
-                        performanceData.reduce((sum, entry) => sum + entry.cpa, 0) / performanceData.length : 0
-                },
-                dataExportacao: new Date().toLocaleString('pt-BR')
-            };
+        function updateDailySummary() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayRecords = performanceRecords.filter(r => r.date === today);
 
-            const dataStr = JSON.stringify(exportData, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-            
-            const exportFileDefaultName = `mente-gestor-${new Date().toISOString().split('T')[0]}.json`;
-            
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
+            const todayInvestment = todayRecords.reduce((sum, r) => sum + r.spent, 0);
+            const todaySales = todayRecords.reduce((sum, r) => sum + r.sales, 0);
+            const todayReturn = todayRecords.reduce((sum, r) => sum + r.returnValue, 0);
 
-            // Mostrar mensagem de sucesso
-            const alert = document.createElement('div');
-            alert.className = 'alert success';
-            alert.textContent = '📤 Dados exportados com sucesso!';
-            document.querySelector('#performance .card').appendChild(alert);
-            setTimeout(() => alert.remove(), 3000);
+            document.getElementById('todayInvestment').textContent = 'R$ ' + todayInvestment.toFixed(2);
+            document.getElementById('todaySales').textContent = todaySales;
+            document.getElementById('todayReturn').textContent = 'R$ ' + todayReturn.toFixed(2);
         }
 
-        function importData() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            input.onchange = function(event) {
-                const file = event.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        try {
-                            const data = JSON.parse(e.target.result);
-                            
-                            if (data.produto) {
-                                productData = data.produto;
-                                localStorage.setItem('menteGestorProduct', JSON.stringify(productData));
-                            }
-                            
-                            if (data.performance) {
-                                performanceData = data.performance;
-                                localStorage.setItem('menteGestorPerformance', JSON.stringify(performanceData));
-                            }
-                            
-                            // Recarregar interface
-                            loadSavedData();
-                            
-                            const alert = document.createElement('div');
-                            alert.className = 'alert success';
-                            alert.textContent = '📥 Dados importados com sucesso!';
-                            document.body.appendChild(alert);
-                            setTimeout(() => alert.remove(), 3000);
-                            
-                        } catch (error) {
-                            alert('Erro ao importar dados. Verifique se o arquivo está correto.');
-                        }
-                    };
-                    reader.readAsText(file);
-                }
-            };
-            input.click();
+        function filterRecordsByProduct() {
+            updateRecordsTable();
         }
 
-        // Função para limpar todos os dados
-        function clearAllData() {
-            if (confirm('⚠️ ATENÇÃO: Isso irá apagar TODOS os dados salvos. Esta ação não pode ser desfeita. Deseja continuar?')) {
-                localStorage.removeItem('menteGestorProduct');
-                localStorage.removeItem('menteGestorPerformance');
-                
-                // Limpar variáveis
-                productData = {};
-                performanceData = [];
-                
-                // Limpar formulários
-                document.querySelectorAll('input, select').forEach(input => input.value = '');
-                
-                // Limpar displays
-                document.getElementById('metricsResults').innerHTML = '<p style="text-align: center; color: #666;">Configure seu produto para ver as métricas calculadas</p>';
-                document.getElementById('strategyResults').innerHTML = '<p style="text-align: center; color: #666;">Complete a configuração para gerar sua estratégia personalizada</p>';
-                document.getElementById('performanceLog').innerHTML = '<p>Nenhum registro encontrado. Adicione sua primeira performance!</p>';
-                
-                // Destruir gráfico
-                if (chart) {
-                    chart.destroy();
-                    chart = null;
-                }
-                
-                const alert = document.createElement('div');
-                alert.className = 'alert';
-                alert.textContent = '🗑️ Todos os dados foram apagados!';
-                document.body.appendChild(alert);
-                setTimeout(() => alert.remove(), 3000);
-            }
+        function deleteRecord(id) {
+            performanceRecords = performanceRecords.filter(record => record.id !== id);
+            saveDataToStorage();
+            updateRecordsTable();
+            updateDailySummary();
         }
 
-        // Função para gerar relatório detalhado
+        function clearPerformanceForm() {
+            document.getElementById('dailySpent').value = '';
+            document.getElementById('dailyClicks').value = '';
+            document.getElementById('dailySalesRecord').value = '';
+            document.getElementById('dailyReturn').value = '';
+        }
+
         function generateReport() {
-            if (performanceData.length === 0) {
-                alert('Adicione pelo menos um registro de performance para gerar o relatório!');
+            const startDate = document.getElementById('reportStartDate').value;
+            const endDate = document.getElementById('reportEndDate').value;
+            const selectedProduct = document.getElementById('productSelect').value;
+
+            if (!startDate || !endDate) {
+                alert('Por favor, selecione as datas de início e fim.');
                 return;
             }
 
-            const totalSpent = performanceData.reduce((sum, entry) => sum + entry.spent, 0);
-            const totalRevenue = performanceData.reduce((sum, entry) => sum + entry.revenue, 0);
-            const totalConversions = performanceData.reduce((sum, entry) => sum + entry.conversions, 0);
-            const totalClicks = performanceData.reduce((sum, entry) => sum + entry.clicks, 0);
-            
+            let filteredRecords = performanceRecords.filter(record => {
+                const dateMatch = record.date >= startDate && record.date <= endDate;
+                const productMatch = selectedProduct ? record.productId == selectedProduct : true;
+                return dateMatch && productMatch;
+            });
+
+            if (filteredRecords.length === 0) {
+                alert('Nenhum registro encontrado no período selecionado.');
+                return;
+            }
+
+            // Calcular totais
+            const totalSpent = filteredRecords.reduce((sum, record) => sum + record.spent, 0);
+            const totalRevenue = filteredRecords.reduce((sum, record) => sum + record.returnValue, 0);
             const avgRoas = totalSpent > 0 ? totalRevenue / totalSpent : 0;
-            const avgCpa = totalConversions > 0 ? totalSpent / totalConversions : 0;
-            const avgCpc = totalClicks > 0 ? totalSpent / totalClicks : 0;
-            const avgConversionRate = totalClicks > 0 ? (totalConversions / totalClicks) * 100 : 0;
-            const totalRoi = totalSpent > 0 ? ((totalRevenue - totalSpent) / totalSpent) * 100 : 0;
+            const avgRoi = totalSpent > 0 ? ((totalRevenue - totalSpent) / totalSpent) * 100 : 0;
 
             // Análise por plataforma
-            const facebookData = performanceData.filter(entry => entry.platform === 'Facebook');
-            const googleData = performanceData.filter(entry => entry.platform === 'Google');
-            
-            const fbSpent = facebookData.reduce((sum, entry) => sum + entry.spent, 0);
-            const fbRevenue = facebookData.reduce((sum, entry) => sum + entry.revenue, 0);
-            const fbRoas = fbSpent > 0 ? fbRevenue / fbSpent : 0;
-            
-            const googleSpent = googleData.reduce((sum, entry) => sum + entry.spent, 0);
-            const googleRevenue = googleData.reduce((sum, entry) => sum + entry.revenue, 0);
-            const googleRoas = googleSpent > 0 ? googleRevenue / googleSpent : 0;
+            const googleRecords = filteredRecords.filter(r => r.platform === 'Google' || r.platform === 'Ambas');
+            const facebookRecords = filteredRecords.filter(r => r.platform === 'Facebook' || r.platform === 'Ambas');
 
-            const reportHtml = `
-                <div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); max-width: 800px; margin: 20px auto;">
-                    <h2 style="text-align: center; color: #4a5568; margin-bottom: 30px;">📊 Relatório Completo de Performance</h2>
-                    
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
-                        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
-                            <h4>Total Investido</h4>
-                            <p style="font-size: 1.8em; font-weight: bold; margin: 10px 0;">R$ ${totalSpent.toFixed(2)}</p>
-                        </div>
-                        <div style="background: linear-gradient(135deg, #51cf66 0%, #40c057 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
-                            <h4>Total Faturado</h4>
-                            <p style="font-size: 1.8em; font-weight: bold; margin: 10px 0;">R$ ${totalRevenue.toFixed(2)}</p>
-                        </div>
-                        <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
-                            <h4>ROAS Médio</h4>
-                            <p style="font-size: 1.8em; font-weight: bold; margin: 10px 0;">${avgRoas.toFixed(2)}x</p>
-                        </div>
-                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
-                            <h4>ROI</h4>
-                            <p style="font-size: 1.8em; font-weight: bold; margin: 10px 0;">${totalRoi.toFixed(1)}%</p>
-                        </div>
-                    </div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
-                        <div>
-                            <h3 style="color: #4a5568; margin-bottom: 15px;">📈 Métricas Gerais</h3>
-                            <div style="background: #f7fafc; padding: 20px; border-radius: 10px;">
-                                <p><strong>Total de Conversões:</strong> ${totalConversions}</p>
-                                <p><strong>Total de Cliques:</strong> ${totalClicks.toLocaleString()}</p>
-                                <p><strong>CPA Médio:</strong> R$ ${avgCpa.toFixed(2)}</p>
-                                <p><strong>CPC Médio:</strong> R$ ${avgCpc.toFixed(2)}</p>
-                                <p><strong>Taxa de Conversão:</strong> ${avgConversionRate.toFixed(2)}%</p>
-                                <p><strong>Período:</strong> ${performanceData.length} dias</p>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <h3 style="color: #4a5568; margin-bottom: 15px;">🎯 Análise por Plataforma</h3>
-                            <div style="background: #f7fafc; padding: 20px; border-radius: 10px;">
-                                <div style="margin-bottom: 15px;">
-                                    <h4 style="color: #1877f2;">📘 Facebook Ads</h4>
-                                    <p>Investimento: R$ ${fbSpent.toFixed(2)}</p>
-                                    <p>Receita: R$ ${fbRevenue.toFixed(2)}</p>
-                                    <p>ROAS: ${fbRoas.toFixed(2)}x</p>
-                                </div>
-                                <div>
-                                    <h4 style="color: #4285f4;">🔍 Google Ads</h4>
-                                    <p>Investimento: R$ ${googleSpent.toFixed(2)}</p>
-                                    <p>Receita: R$ ${googleRevenue.toFixed(2)}</p>
-                                    <p>ROAS: ${googleRoas.toFixed(2)}x</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <h3 style="color: #4a5568; margin-bottom: 15px;">💡 Insights e Recomendações</h3>
-                        <div style="background: #f7fafc; padding: 20px; border-radius: 10px;">
-                            ${avgRoas >= productData.targetRoas ? 
-                                '<p style="color: #51cf66;"><strong>✅ Performance Excelente:</strong> Seu ROAS está acima da meta! Continue investindo e considere aumentar o orçamento.</p>' : 
-                                '<p style="color: #fa709a;"><strong>⚠️ Atenção:</strong> ROAS abaixo da meta. Otimize públicos, criativos e revise segmentações.</p>'
-                            }
-                            ${avgCpa <= productData.cpa ? 
-                                '<p style="color: #51cf66;"><strong>✅ CPA Ideal:</strong> Custo por aquisição dentro do esperado.</p>' : 
-                                '<p style="color: #fa709a;"><strong>⚠️ CPA Alto:</strong> Revise lances e otimize campanhas para reduzir CPA.</p>'
-                            }
-                            ${fbRoas > googleRoas ? 
-                                '<p style="color: #1877f2;"><strong>🏆 Facebook está performando melhor:</strong> Considere alocar mais orçamento para Facebook Ads.</p>' : 
-                                '<p style="color: #4285f4;"><strong>🏆 Google está performando melhor:</strong> Considere alocar mais orçamento para Google Ads.</p>'
-                            }
-                        </div>
-                    </div>
-                    
-                    <div style="text-align: center;">
-                        <button onclick="this.parentElement.parentElement.remove()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold;">Fechar Relatório</button>
-                    </div>
-                </div>
-            `;
+            const googleSpent = googleRecords.reduce((sum, record) => sum + (record.platform === 'Ambas' ? record.spent / 2 : record.spent), 0);
+            const googleReturn = googleRecords.reduce((sum, record) => sum + (record.platform === 'Ambas' ? record.returnValue / 2 : record.returnValue), 0);
+            const googleRoas = googleSpent > 0 ? googleReturn / googleSpent : 0;
 
-            const reportContainer = document.createElement('div');
-            reportContainer.innerHTML = reportHtml;
-            reportContainer.style.position = 'fixed';
-            reportContainer.style.top = '0';
-            reportContainer.style.left = '0';
-            reportContainer.style.width = '100%';
-            reportContainer.style.height = '100%';
-            reportContainer.style.background = 'rgba(0,0,0,0.8)';
-            reportContainer.style.zIndex = '9999';
-            reportContainer.style.overflow = 'auto';
-            reportContainer.style.padding = '20px';
-            
-            document.body.appendChild(reportContainer);
+            const facebookSpent = facebookRecords.reduce((sum, record) => sum + (record.platform === 'Ambas' ? record.spent / 2 : record.spent), 0);
+            const facebookReturn = facebookRecords.reduce((sum, record) => sum + (record.platform === 'Ambas' ? record.returnValue / 2 : record.returnValue), 0);
+            const facebookRoas = facebookSpent > 0 ? facebookReturn / facebookSpent : 0;
+
+            // Atualizar dados do relatório
+            document.getElementById('reportTotalSpent').textContent = 'R$ ' + totalSpent.toFixed(2);
+            document.getElementById('reportTotalRevenue').textContent = 'R$ ' + totalRevenue.toFixed(2);
+            document.getElementById('reportAvgRoas').textContent = avgRoas.toFixed(2) + 'x';
+            document.getElementById('reportAvgRoi').textContent = avgRoi.toFixed(1) + '%';
+
+            // Análise por plataforma
+            document.getElementById('googleTotalSpent').textContent = 'R$ ' + googleSpent.toFixed(2);
+            document.getElementById('googleTotalReturn').textContent = 'R$ ' + googleReturn.toFixed(2);
+            document.getElementById('googleRoas').textContent = googleRoas.toFixed(2) + 'x';
+
+            document.getElementById('facebookTotalSpent').textContent = 'R$ ' + facebookSpent.toFixed(2);
+            document.getElementById('facebookTotalReturn').textContent = 'R$ ' + facebookReturn.toFixed(2);
+            document.getElementById('facebookRoas').textContent = facebookRoas.toFixed(2) + 'x';
+
+            // Gerar insights
+            generateCampaignInsights(filteredRecords, avgRoas, avgRoi);
+
+            // Criar gráfico
+            createPerformanceChart(filteredRecords);
+
+            // Mostrar relatório
+            document.getElementById('reportResults').style.display = 'block';
         }
 
-        // Adicionar botões extras na interface
-        function addExtraButtons() {
-            const performanceCard = document.querySelector('#performance .card');
+        function generatePhotoReport() {
+            const startDate = document.getElementById('reportStartDate').value;
+            const endDate = document.getElementById('reportEndDate').value;
+            const selectedProduct = document.getElementById('productSelect').value;
+
+            if (!startDate || !endDate) {
+                alert('Por favor, selecione as datas de início e fim.');
+                return;
+            }
+
+            let filteredRecords = performanceRecords.filter(record => {
+                const dateMatch = record.date >= startDate && record.date <= endDate;
+                const productMatch = selectedProduct ? record.productId == selectedProduct : true;
+                return dateMatch && productMatch;
+            });
+
+            if (filteredRecords.length === 0) {
+                alert('Nenhum registro encontrado no período selecionado.');
+                return;
+            }
+
+            // Calcular dados para o relatório
+            const totalSpent = filteredRecords.reduce((sum, record) => sum + record.spent, 0);
+            const totalRevenue = filteredRecords.reduce((sum, record) => sum + record.returnValue, 0);
+            const avgRoas = totalSpent > 0 ? totalRevenue / totalSpent : 0;
+            const avgRoi = totalSpent > 0 ? ((totalRevenue - totalSpent) / totalSpent) * 100 : 0;
+
+            // Atualizar relatório para foto
+            document.getElementById('photoTotalSpent').textContent = 'R$ ' + totalSpent.toFixed(2);
+            document.getElementById('photoTotalRevenue').textContent = 'R$ ' + totalRevenue.toFixed(2);
+            document.getElementById('photoAvgRoas').textContent = avgRoas.toFixed(2) + 'x';
+            document.getElementById('photoAvgRoi').textContent = avgRoi.toFixed(1) + '%';
+
+            // Período do relatório
+            document.getElementById('reportPeriodText').textContent = 
+                `Período: ${new Date(startDate).toLocaleDateString('pt-BR')} - ${new Date(endDate).toLocaleDateString('pt-BR')}`;
+
+            // Gerar dicas personalizadas
+            generatePhotoTips(filteredRecords, avgRoas, avgRoi);
+
+            // Mostrar relatório para foto
+            document.getElementById('photoReport').style.display = 'block';
             
-            const importBtn = document.createElement('button');
-            importBtn.className = 'btn';
-            importBtn.style.background = 'linear-gradient(135deg, #17a2b8 0%, #138496 100%)';
-            importBtn.innerHTML = '📥 Importar Dados';
-            importBtn.onclick = importData;
-            
-            const reportBtn = document.createElement('button');
-            reportBtn.className = 'btn';
-            reportBtn.style.background = 'linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%)';
-            reportBtn.innerHTML = '📋 Gerar Relatório';
-            reportBtn.onclick = generateReport;
-            
-            const clearBtn = document.createElement('button');
-            clearBtn.className = 'btn';
-            clearBtn.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
-            clearBtn.innerHTML = '🗑️ Limpar Tudo';
-            clearBtn.onclick = clearAllData;
-            
-            performanceCard.appendChild(importBtn);
-            performanceCard.appendChild(reportBtn);
-            performanceCard.appendChild(clearBtn);
+            // Scroll para o relatório
+            document.getElementById('photoReport').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // Auto-save enquanto digita
-        function setupAutoSave() {
-            const inputs = ['productName', 'productValue', 'platformFee', 'incomeTax', 'monthlyGoal', 
-                           'targetRoas', 'conversionRate', 'avgCpc', 'budgetSplit'];
+        function generatePhotoTips(records, avgRoas, avgRoi) {
+            const tips = [];
             
-            inputs.forEach(inputId => {
-                const input = document.getElementById(inputId);
-                if (input) {
-                    input.addEventListener('input', () => {
-                        // Salvar após 1 segundo de inatividade
-                        clearTimeout(input.saveTimeout);
-                        input.saveTimeout = setTimeout(() => {
-                            if (document.getElementById('productName').value && document.getElementById('productValue').value) {
-                                calculateMetrics();
-                            }
-                        }, 1000);
-                    });
+            if (avgRoas < 2) {
+                tips.push('🎯 Otimize seus anúncios: Teste novos públicos e melhore sua landing page');
+                tips.push('📝 Revise seu copy: Mensagens mais persuasivas aumentam conversões');
+            } else if (avgRoas > 4) {
+                tips.push('🚀 Excelente performance! Considere aumentar o budget para escalar');
+                tips.push('📊 Teste novos produtos para diversificar seu funil');
+            }
+
+            const avgConversion = records.reduce((sum, r) => sum + r.conversionRate, 0) / records.length;
+            if (avgConversion < 2) {
+                tips.push('⚡ Melhore sua taxa de conversão: Teste diferentes ofertas e CTAs');
+                tips.push('🎨 Otimize o design da landing page para maior impacto visual');
+            }
+
+            tips.push('💰 Implemente order bumps para aumentar o ticket médio');
+            tips.push('🔄 Configure campanhas de remarketing para recuperar visitantes');
+            tips.push('📱 Teste anúncios em diferentes horários para maximizar reach');
+            tips.push('🎬 Use vídeos criativos para aumentar o engajamento');
+
+            const tipsContainer = document.getElementById('photoTips');
+            tipsContainer.innerHTML = '';
+            
+            tips.slice(0, 6).forEach(tip => {
+                const div = document.createElement('div');
+                div.className = 'tip-item';
+                div.textContent = tip;
+                tipsContainer.appendChild(div);
+            });
+        }
+
+        function generateCampaignInsights(records, avgRoas, avgRoi) {
+            const insights = [];
+            
+            if (avgRoas < 2) {
+                insights.push('• ROAS baixo: Considere otimizar seus anúncios, testar novos públicos ou revisar sua landing page.');
+            } else if (avgRoas > 4) {
+                insights.push('• Excelente ROAS! Considere aumentar o investimento para escalar os resultados.');
+            }
+
+            if (avgRoi < 50) {
+                insights.push('• ROI pode ser melhorado: Revise seus custos e considere aumentar o valor do produto ou reduzir custos de aquisição.');
+            }
+
+            const avgConversion = records.reduce((sum, r) => sum + r.conversionRate, 0) / records.length;
+            if (avgConversion < 2) {
+                insights.push('• Taxa de conversão baixa: Otimize sua landing page, teste diferentes ofertas ou melhore o copy dos anúncios.');
+            }
+
+            const googlePerf = records.filter(r => r.platform === 'Google').reduce((sum, r) => sum + r.roas, 0) / records.filter(r => r.platform === 'Google').length || 0;
+            const facebookPerf = records.filter(r => r.platform === 'Facebook').reduce((sum, r) => sum + r.roas, 0) / records.filter(r => r.platform === 'Facebook').length || 0;
+
+            if (googlePerf > facebookPerf * 1.2) {
+                insights.push('• Google Ads está performando melhor: Considere realocar mais budget para Google.');
+            } else if (facebookPerf > googlePerf * 1.2) {
+                insights.push('• Facebook Ads está performando melhor: Considere realocar mais budget para Facebook.');
+            }
+
+            insights.push('• Teste diferentes horários de publicação para maximizar o engajamento.');
+            insights.push('• Implemente remarketing para recuperar visitantes que não converteram.');
+            insights.push('• Considere adicionar order bumps e upsells para aumentar o ticket médio.');
+
+            document.getElementById('campaignInsights').innerHTML = insights.map(insight => `<p>${insight}</p>`).join('');
+        }
+
+        function createPerformanceChart(records) {
+            const canvas = document.getElementById('performanceChart');
+            const ctx = canvas.getContext('2d');
+            
+            // Limpar canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (records.length === 0) return;
+
+            // Configurações do gráfico
+            const padding = 80;
+            const chartWidth = canvas.width - 2 * padding;
+            const chartHeight = canvas.height - 2 * padding;
+            
+            // Dados para o gráfico
+            const sortedRecords = records.sort((a, b) => new Date(a.date) - new Date(b.date));
+            const maxSpent = Math.max(...sortedRecords.map(r => r.spent));
+            const maxSales = Math.max(...sortedRecords.map(r => r.sales));
+            const maxReturn = Math.max(...sortedRecords.map(r => r.returnValue));
+            
+            // Desenhar fundo do gráfico
+            ctx.fillStyle = '#111';
+            ctx.fillRect(padding, padding, chartWidth, chartHeight);
+            
+            // Desenhar grade
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const y = padding + (chartHeight / 5) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(padding + chartWidth, y);
+                ctx.stroke();
+            }
+            
+            // Desenhar eixos
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 2;
+            
+            // Eixo Y
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, padding + chartHeight);
+            ctx.stroke();
+            
+            // Eixo X
+            ctx.beginPath();
+            ctx.moveTo(padding, padding + chartHeight);
+            ctx.lineTo(padding + chartWidth, padding + chartHeight);
+            ctx.stroke();
+            
+            // Desenhar linhas de dados
+            const stepX = sortedRecords.length > 1 ? chartWidth / (sortedRecords.length - 1) : 0;
+            
+            // Linha de gastos (vermelho)
+            ctx.strokeStyle = '#ff6b6b';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            sortedRecords.forEach((record, index) => {
+                const x = padding + index * stepX;
+                const y = padding + chartHeight - (record.spent / Math.max(maxSpent, maxReturn)) * chartHeight;
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
                 }
+                // Pontos
+                ctx.fillStyle = '#ff6b6b';
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, 2 * Math.PI);
+                ctx.fill();
             });
+            ctx.stroke();
+            
+            // Linha de vendas (verde)
+            ctx.strokeStyle = '#4ecdc4';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            sortedRecords.forEach((record, index) => {
+                const x = padding + index * stepX;
+                const y = padding + chartHeight - (record.sales / maxSales) * chartHeight;
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+                // Pontos
+                ctx.fillStyle = '#4ecdc4';
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+            ctx.stroke();
+            
+            // Linha de retorno (azul)
+            ctx.strokeStyle = '#45b7d1';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            sortedRecords.forEach((record, index) => {
+                const x = padding + index * stepX;
+                const y = padding + chartHeight - (record.returnValue / Math.max(maxSpent, maxReturn)) * chartHeight;
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+                // Pontos
+                ctx.fillStyle = '#45b7d1';
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+            ctx.stroke();
+            
+            // Legenda melhorada
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('💰 Investimento', padding + 20, 30);
+            ctx.fillStyle = '#ff6b6b';
+            ctx.fillRect(padding, 20, 15, 3);
+            
+            ctx.fillStyle = '#fff';
+            ctx.fillText('🛒 Vendas', padding + 150, 30);
+            ctx.fillStyle = '#4ecdc4';
+            ctx.fillRect(padding + 130, 20, 15, 3);
+            
+            ctx.fillStyle = '#fff';
+            ctx.fillText('💵 Retorno', padding + 250, 30);
+            ctx.fillStyle = '#45b7d1';
+            ctx.fillRect(padding + 230, 20, 15, 3);
+            
+            // Labels dos eixos melhorados
+            ctx.fillStyle = '#ccc';
+            ctx.font = '12px Arial';
+            const maxValue = Math.max(maxSpent, maxReturn);
+            ctx.fillText('R$ ' + maxValue.toFixed(0), 5, padding + 15);
+            ctx.fillText('0', 5, padding + chartHeight + 5);
+            
+            // Datas no eixo X
+            if (sortedRecords.length > 0) {
+                ctx.font = '10px Arial';
+                sortedRecords.forEach((record, index) => {
+                    if (index % Math.ceil(sortedRecords.length / 5) === 0) {
+                        const x = padding + index * stepX;
+                        const date = new Date(record.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                        ctx.fillText(date, x - 15, padding + chartHeight + 20);
+                    }
+                });
+            }
         }
 
-        // Notificações de performance
-        function checkPerformanceAlerts() {
-            if (performanceData.length === 0) return;
-            
-            const lastEntry = performanceData[0];
-            const alerts = [];
-            
-            if (productData.cpa && lastEntry.cpa > productData.cpa * 1.5) {
-                alerts.push('⚠️ CPA muito alto no último registro!');
-            }
-            
-            if (productData.targetRoas && lastEntry.roas < productData.targetRoas * 0.7) {
-                alerts.push('📉 ROAS abaixo do esperado!');
-            }
-            
-            if (lastEntry.conversionRate < 1) {
-                alerts.push('🎯 Taxa de conversão muito baixa!');
-            }
-            
-            alerts.forEach(alert => {
-                const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert';
-                alertDiv.textContent = alert;
-                document.body.appendChild(alertDiv);
-                setTimeout(() => alertDiv.remove(), 5000);
-            });
+        // Funções de persistência de dados
+        function saveDataToStorage() {
+            const data = {
+                performanceRecords,
+                savedProducts,
+                currentProductId
+            };
+            localStorage.setItem('dashboardData', JSON.stringify(data));
         }
 
-        // Inicializar aplicação
-        document.addEventListener('DOMContentLoaded', function() {
-            loadSavedData();
-            addExtraButtons();
-            setupAutoSave();
-            
-            // Adicionar mensagens iniciais se não houver dados
-            if (Object.keys(productData).length === 0) {
-                document.getElementById('metricsResults').innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">📝 Configure seu produto na aba "Configuração" para ver as métricas calculadas automaticamente</p>';
-                document.getElementById('strategyResults').innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">🎯 Complete a configuração do produto para gerar sua estratégia personalizada de vendas</p>';
+        function loadSavedData() {
+            const savedData = localStorage.getItem('dashboardData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                performanceRecords = data.performanceRecords || [];
+                savedProducts = data.savedProducts || [];
+                currentProductId = data.currentProductId || null;
+                
+                updateSavedProductsList();
+                updateRecordsTable();
             }
-        });
+        }
 
-        // Salvar dados antes de sair da página
-        window.addEventListener('beforeunload', function() {
-            if (Object.keys(productData).length > 0) {
-                localStorage.setItem('menteGestorProduct', JSON.stringify(productData));
-            }
-            if (performanceData.length > 0) {
-                localStorage.setItem('menteGestorPerformance', JSON.stringify(performanceData));
-            }
-        });
+        // Inicializar com data atual nos campos de relatório
+        const today = new Date().toISOString().split('T')[0];
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        
+        document.getElementById('reportStartDate').value = thirtyDaysAgo;
+        document.getElementById('reportEndDate').value = today;
     </script>
 </body>
 </html>
